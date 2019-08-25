@@ -59,7 +59,6 @@ const config = {
         options: {
           name: '[name].[ext]',
           outputPath: '/fonts/',
-          emitFile: false,
         },
       },
     ],
