@@ -24,5 +24,8 @@
     "https://*/",
     "http://*/",
     "storage"
-  ]
+  ],
+  "chrome_url_overrides": {
+    "newtab": "override/override.html"
+  }
 }
