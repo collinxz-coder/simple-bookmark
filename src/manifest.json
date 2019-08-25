@@ -19,8 +19,10 @@
       "background.js"
     ]
   },
-  "options_ui": {
-    "page": "options/options.html",
-    "chrome_style": true
-  }
+  "options_page": "options/options.html",
+  "permissions": [
+    "https://*/",
+    "http://*/",
+    "storage"
+  ]
 }

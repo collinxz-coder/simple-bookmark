@@ -50,7 +50,6 @@ const config = {
         options: {
           name: '[name].[ext]',
           outputPath: '/images/',
-          emitFile: false,
         },
       },
       {
