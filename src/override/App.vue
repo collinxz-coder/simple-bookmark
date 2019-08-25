@@ -26,21 +26,47 @@
                     }
                 })
             },
+
+            /**
+             * get remote background img.
+             */
             getBackgroundImg() {
-                let url = "http://wallpaper.apc.360.cn/index.php?c=WallPaper&a=getAppsByCategory&cid=" + this.img_type + "&start=1&count=1";
-                axios.get(url).then(res => {
-                    let data = res.data;
+                chrome.storage.sync.get(['offset_' + this.img_type], res => {
+                    let offset = res['offset_' + this.img_type] ? res['offset_' + this.img_type] : 1;
 
-                    if (data.errno != 0) return false;
-                    if (data.data.length <= 0) return false;
+                    let url = "http://wallpaper.apc.360.cn/index.php?c=WallPaper&a=getAppsByCategory&cid=" + this.img_type + "&start=" + offset + "&count=1";
+                    axios.get(url).then(res => {
+                        let data = res.data;
 
-                    data = data.data[0];
-                    if (data.url) {
-                        console.log("123");
-                        this.bg_img_url = data.url;
+                        if (data.errno != 0) return false;
+                        if (data.data.length <= 0) return false;
+
+                        data = data.data[0];
+                        if (data.url) {
+                            this.bg_img_url = data.url;
+                            chrome.storage.sync.get(['offset_' + this.img_type + '_time'], time => {
+                                if (! time['offset_' + this.img_type + '_time']) {
+                                    this.increaseThisTypeOffset();
+                                } else if ((Date.parse(new Date()) / 1000 - time['offset_' + this.img_type + '_time']) > 86400) {
+                                    this.increaseThisTypeOffset();
+                                }
+                            })
+                        }
+                    })
+                });
+            },
+
+            increaseThisTypeOffset() {
+                let key = 'offset_' + this.img_type;
+                chrome.storage.sync.get([key], res => {
+                    if (res[key]) {
+                        chrome.storage.sync.set({[key]: res[key] + 1, [key + '_time' ]: Date.parse(new Date()) / 1000 });
+                    } else {
+                        // 如果没有找到，则初始化为1
+                        chrome.storage.sync.set({[key]: 1, [key + '_time' ]: Date.parse(new Date()) / 1000 });
                     }
                 })
-            }
+            },
         },
 
         mounted() {
