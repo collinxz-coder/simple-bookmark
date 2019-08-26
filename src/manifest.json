@@ -1,7 +1,7 @@
 {
   "name": "simple-bookmark",
   "description": "fast and powerful bookmarks",
-  "version": null,
+  "version": "0.0.1",
   "manifest_version": 2,
   "icons": {
     "16": "icons/icon_16.png",
@@ -23,7 +23,8 @@
   "permissions": [
     "https://*/",
     "http://*/",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "chrome_url_overrides": {
     "newtab": "override/override.html"

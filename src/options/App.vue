@@ -53,22 +53,27 @@ export default {
       engines: [{
         key: 'baidu',
         name: '百度',
+        icon: "baidu.png",
         value: 'https://www.baidu.com/s?wd=%s'
       }, {
         key: 'google',
         name: '谷歌',
+        icon: "google.png",
         value: 'https://www.google.com/search?q=%s'
       },{
         key: 'bing',
         name: '必应',
+        icon: "bing.png",
         value: 'https://cn.bing.com/search?q=%s',
       },{
         key: 'duckduckgo',
         name: 'DuckDuckGo',
+        icon: 'duckduckgo.png',
         value: 'https://duckduckgo.com/?q=%s',
       },{
         key: 'geekband',
         name: '极客搜索',
+        icon: 'geekband.png',
         value: 'https://s.geekbang.org/search/c=0/k=%s/t='
       }],
       search_engine: null,
@@ -87,13 +92,15 @@ export default {
      */
     changeEngine(value) {
       let engine_name = "";
+      let engine_icon = "";
       this.engines.map((item, index) => {
         if (item.value === value) {
           engine_name = item.name;
+          engine_icon = item.icon;
         }
       });
 
-      chrome.storage.sync.set({engine_name: engine_name, engine_value: value}, () => {
+      chrome.storage.sync.set({engine_name: engine_name, engine_value: value, engine_icon: engine_icon}, () => {
         // success.
       })
     },
