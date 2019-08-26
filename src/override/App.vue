@@ -27,7 +27,10 @@
     import '../../src/assets/images/bing.png';
     import '../../src/assets/images/duckduckgo.png';
 
+    import Storage from "../utils/Storage";
+
     import axios from 'axios';
+    import RemoteImages from "../utils/RemoteImages";
     export default {
         name: "App.vue",
         data() {
@@ -36,52 +39,27 @@
                 img_type: '',
                 search_key: '',
                 engine_icon: '',
+                img_offset: null,      // 背景图片偏移量
             }
         },
 
         methods: {
-            /**
-             * Switch to the next image
-             */
             next_bg() {
-                chrome.storage.sync.get(['offset_' + this.img_type], res => {
-                    let offset = res['offset_' + this.img_type] ? res['offset_' + this.img_type] : 1;
-                    offset++;
+                this.img_offset ++;
 
-                    let url = "http://wallpaper.apc.360.cn/index.php?c=WallPaper&a=getAppsByCategory&cid=" + this.img_type + "&start=" + offset + "&count=1";
-                    axios.get(url).then(res => {
-                        let data = res.data;
-
-                        if (data.errno != 0) return false;
-                        if (data.data.length <= 0) return false;
-                        data = data.data[0];
-                        if (!data.url) return false;
-
-                        this.bg_img_url = data.url;
-                        this.increaseThisTypeOffset();
-                    })
+                RemoteImages.getImgUrl(this.img_type, this.img_offset).then(res => {
+                    this.bg_img_url = res;
+                }).catch(err => {
+                    // console.log(err);
                 });
             },
-            /**
-             * Switch to the previous image
-             */
+
             prev_bg() {
-                chrome.storage.sync.get(['offset_' + this.img_type], res => {
-                    let offset = res['offset_' + this.img_type] ? res['offset_' + this.img_type] : 1;
-                    offset--;
-
-                    let url = "http://wallpaper.apc.360.cn/index.php?c=WallPaper&a=getAppsByCategory&cid=" + this.img_type + "&start=" + offset + "&count=1";
-                    axios.get(url).then(res => {
-                        let data = res.data;
-
-                        if (data.errno != 0) return false;
-                        if (data.data.length <= 0) return false;
-                        data = data.data[0];
-                        if (!data.url) return false;
-
-                        this.bg_img_url = data.url;
-                        this.minusThisTypeOffset();
-                    })
+                this.img_offset --;
+                RemoteImages.getImgUrl(this.img_type, this.img_offset).then(res => {
+                    this.bg_img_url = res;
+                }).catch(err => {
+                    // console.log(err);
                 });
             },
 
@@ -89,20 +67,8 @@
              * 搜索
              */
             search() {
-                chrome.storage.sync.get(['engine_value'], res => {
-                    if (! res.engine_value) {
-                        return false;
-                    }
-
-                    let engine = res.engine_value;
-                    let url = engine.replace("%s", this.search_key);
-
-                    // // create a new tab
-                    // chrome.tabs.create({
-                    //     url: url,
-                    //     active: true,
-                    // })
-
+                Storage.get('engine_value').then(value => {
+                    let url = value.replace("%s", this.search_key);
                     chrome.tabs.getCurrent(tab => {
                         let tab_id = tab.id;
                         chrome.tabs.update(tab_id, {
@@ -113,84 +79,59 @@
                 });
             },
 
-            /**
-             * get current image type.
-             */
-            getCurrentImgType() {
-                chrome.storage.sync.get(['image_type'], res => {
-                    if (res.image_type) {
-                        this.img_type = res.image_type;
-                    }
-                })
-            },
+            getImage() {
+                RemoteImages.getImgUrl(this.img_type, this.img_offset).then(value => {
+                    this.bg_img_url = value;
 
-            /**
-             * get remote background img.
-             */
-            getBackgroundImg() {
-                chrome.storage.sync.get(['offset_' + this.img_type], res => {
-                    let offset = res['offset_' + this.img_type] ? res['offset_' + this.img_type] : 1;
-
-                    let url = "http://wallpaper.apc.360.cn/index.php?c=WallPaper&a=getAppsByCategory&cid=" + this.img_type + "&start=" + offset + "&count=1";
-                    axios.get(url).then(res => {
-                        let data = res.data;
-
-                        if (data.errno != 0) return false;
-                        if (data.data.length <= 0) return false;
-
-                        data = data.data[0];
-                        if (data.url) {
-                            this.bg_img_url = data.url;
-                            chrome.storage.sync.get(['offset_' + this.img_type + '_time'], time => {
-                                if (! time['offset_' + this.img_type + '_time']) {
-                                    this.increaseThisTypeOffset();
-                                } else if ((Date.parse(new Date()) / 1000 - time['offset_' + this.img_type + '_time']) > 86400) {
-                                    this.increaseThisTypeOffset();
-                                }
-                            })
+                    Storage.get('offset_' + this.img_type + '_time').then(time => {
+                        if ((Date.parse(new Date()) / 1000 - time) > 86400) {
+                            this.img_offset++;
                         }
-                    })
+                    }).catch(err => {});
+                }).catch(err => {
+                    console.log(err);
+                    console.log("error");
                 });
-            },
-
-            increaseThisTypeOffset() {
-                let key = 'offset_' + this.img_type;
-                chrome.storage.sync.get([key], res => {
-                    if (res[key]) {
-                        chrome.storage.sync.set({[key]: res[key] + 1, [key + '_time' ]: Date.parse(new Date()) / 1000 });
-                    } else {
-                        // 如果没有找到，则初始化为1
-                        chrome.storage.sync.set({[key]: 1, [key + '_time' ]: Date.parse(new Date()) / 1000 });
-                    }
-                })
-            },
-
-            minusThisTypeOffset() {
-                let key = 'offset_' + this.img_type;
-                chrome.storage.sync.get([key], res => {
-                    if (res[key]) {
-                        chrome.storage.sync.set({[key]: res[key] - 1, [key + '_time' ]: Date.parse(new Date()) / 1000 });
-                    } else {
-                        // 如果没有找到，则初始化为1
-                        chrome.storage.sync.set({[key]: 1, [key + '_time' ]: Date.parse(new Date()) / 1000 });
-                    }
-                })
-            },
+            }
         },
 
         mounted() {
-            // get engine icon.
-            chrome.storage.sync.get(['engine_icon'], res => {
-                if (res.engine_icon) {
-                    this.engine_icon = "/images/" + res.engine_icon;
-                }
+            Storage.get('engine_icon').then(res => {
+                this.engine_icon = "/images/" + res;
             });
-            this.getCurrentImgType();
+
+            Storage.compulsoryGet('image_type').then(value => {
+                this.img_type = value;
+                return Storage.compulsoryGet('offset_' + value);
+            }).then(value => {
+                this.img_offset = value;
+                this.getImage();
+            }).catch(err => {
+               if (! this.img_type) {
+                   alert("请先选择喜欢的图片类型！！！");
+               } else if(! this.img_offset) {
+                   this.img_offset = 1;
+                   Storage.set({
+                       ['offset_' + this.img_type]: this.img_offset,
+                       ['offset_' + this.img_type + '_time']: Date.parse(new Date()) / 1000
+                   });
+                   this.getImage();
+               }
+            });
         },
 
         watch: {
-            img_type: function(value) {
-                this.getBackgroundImg();
+            /**
+             * save the img offset to chrome storage.
+             * @param value
+             */
+            img_offset: function (value, oldValue) {
+                if (oldValue != null) {
+                    console.log("value: ", value, "old_value: ", oldValue);
+                    let offset_key = 'offset_' + this.img_type;
+                    let time_key = offset_key + '_time';
+                    Storage.set({[offset_key]: this.img_offset, [time_key]: Date.parse(new Date()) / 1000});
+                }
             }
         }
     }

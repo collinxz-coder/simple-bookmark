@@ -43,7 +43,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+import RemoteImages from "../utils/RemoteImages";
+import Storage from "../utils/Storage";
 
 export default {
   name: "App",
@@ -82,75 +83,46 @@ export default {
     }
   },
   mounted() {
-    this.getCurrentImgType();
-    this.getCurrentSearchEngine();
-    this.getImgTypeList();
+    // get current engine type.
+    Storage.get('engine_value').then(value => {
+      this.search_engine = value;
+    });
+
+    // get current image type.
+    Storage.get('image_type').then(value => {
+      this.image_type = value;
+    });
+
+    // get background image type list.
+    RemoteImages.getImagesTypeList().then(value => {
+      this.img_types = value;
+    }).catch(err => {
+      alert("获取背景图片分类失败，请检查网络是否畅通");
+    });
   },
   methods: {
     /**
      * change search engine.
      */
     changeEngine(value) {
-      let engine_name = "";
-      let engine_icon = "";
-      this.engines.map((item, index) => {
-        if (item.value === value) {
-          engine_name = item.name;
-          engine_icon = item.icon;
-        }
+      let selectItem = this.engines.filter((item) => {
+        return item.value === value;
       });
 
-      chrome.storage.sync.set({engine_name: engine_name, engine_value: value, engine_icon: engine_icon}, () => {
-        // success.
-      })
+      if (selectItem.length < 1) return;
+      selectItem = selectItem[0];
+
+      Storage.set({engine_name: selectItem.name, engine_value: value, engine_icon: selectItem.icon});
     },
-
-    /**
-     * get remote image type list.
-     */
-    getImgTypeList() {
-      let url = 'http://cdn.apc.360.cn/index.php?c=WallPaper&a=getAllCategoriesV2&from=360chrome';
-
-      axios.get(url).then(res => {
-          let data = res.data;
-          if (data.errno == 0) {
-            this.img_types = data.data;
-          }
-      });
-    },
-
-    /**
-     * get current image type.
-     */
-    getCurrentImgType() {
-      chrome.storage.sync.get(['image_type'], result => {
-        if (result.image_type) {
-          this.image_type = result.image_type;
-        }
-      })
-    },
-
-    /**
-     * get current search engine.
-     */
-    getCurrentSearchEngine() {
-      chrome.storage.sync.get(['engine_value'], res => {
-        if (res.engine_value)
-          this.search_engine = res.engine_value;
-      })
-    }
   },
   watch: {
     /**
      * save the image_type to storage.
      *
      * @param value
-     * @param oldValue
      */
-    image_type: (value, oldValue) => {
-      chrome.storage.sync.set({image_type: value}, () => {
-        // success.
-      });
+    image_type: (value) => {
+      Storage.set({image_type: value});
     }
   }
 };
