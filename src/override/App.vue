@@ -4,7 +4,38 @@
 
         <div class="content">
             <div class="search-box">
-                <img v-if="engine_icon" :src="engine_icon" class="engine-icon" />
+                <el-dropdown @command="handleCommand" trigger="click">
+                    <span class="el-dropdown-link">
+                        <img v-if="engine_icon" :src="engine_icon" class="engine-icon" />
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item command="google">
+                            <img src="/images/google.png" class="engine-icon change-engine" />
+                            谷歌
+                        </el-dropdown-item>
+
+                        <el-dropdown-item command="bing">
+                            <img src="/images/bing.png" class="engine-icon change-engine" />
+                            必应
+                        </el-dropdown-item>
+
+                        <el-dropdown-item command="duckduckgo">
+                            <img src="/images/duckduckgo.png" class="engine-icon change-engine" />
+                            DuckDuck Go
+                        </el-dropdown-item>
+
+                        <el-dropdown-item command="geekband">
+                            <img src="/images/geekband.png" class="engine-icon change-engine" />
+                            极客搜索
+                        </el-dropdown-item>
+
+                        <el-dropdown-item command="baidu">
+                            <img src="/images/baidu.png" class="engine-icon change-engine" />
+                            百度
+                        </el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+
                 <input type="text" class="search-input" v-model="search_key" @keyup.enter="search" autofocus />
                 <a @click="search"><i class="el-icon-search search-icon"></i></a>
             </div>
@@ -28,6 +59,7 @@
     import '../../src/assets/images/duckduckgo.png';
 
     import Storage from "../utils/Storage";
+    import SearchEngine from "../utils/SearchEngine";
 
     import axios from 'axios';
     import RemoteImages from "../utils/RemoteImages";
@@ -44,6 +76,12 @@
         },
 
         methods: {
+            handleCommand(command) {
+                let engine = SearchEngine[command];
+                Storage.set({engine_name: engine.name, engine_value: engine.value, engine_icon: engine.icon});
+                this.engine_icon = "/images/" + engine.icon;
+            },
+
             next_bg() {
                 this.img_offset ++;
 
@@ -203,5 +241,9 @@
     .change-bg {
         margin-right: 10px;
         cursor: pointer;
+    }
+    .change-engine {
+        vertical-align: middle;
+        margin-right: 10px;
     }
 </style>
