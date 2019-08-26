@@ -57,6 +57,7 @@
                 engine_icon: '',
                 img_offset: null,      // 背景图片偏移量
                 engines: Object.values(SearchEngine),
+                openNewTab: false,
             }
         },
 
@@ -92,13 +93,21 @@
             search() {
                 Storage.get('engine_value').then(value => {
                     let url = value.replace("%s", this.search_key);
-                    chrome.tabs.getCurrent(tab => {
-                        let tab_id = tab.id;
-                        chrome.tabs.update(tab_id, {
+
+                    if (this.openNewTab) {
+                        chrome.tabs.create({
                             url: url,
                             active: true,
                         })
-                    })
+                    } else {
+                        chrome.tabs.getCurrent(tab => {
+                            let tab_id = tab.id;
+                            chrome.tabs.update(tab_id, {
+                                url: url,
+                                active: true,
+                            })
+                        });
+                    }
                 });
             },
 
@@ -122,6 +131,10 @@
         mounted() {
             Storage.get('engine_icon').then(res => {
                 this.engine_icon = "/images/" + res;
+            });
+
+            Storage.get('onpen_new_tab').then(res => {
+                this.openNewTab = res;
             });
 
             Storage.compulsoryGet('image_type').then(value => {

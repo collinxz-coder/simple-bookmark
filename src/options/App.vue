@@ -37,6 +37,16 @@
             </el-select>
           </el-col>
         </el-row>
+
+        <el-row class="row">
+          <el-col :span="6">
+            <p class="option-title">搜索时是否打开新页面</p>
+          </el-col>
+          <el-col :span="18" style="text-align: right">
+            <el-switch v-model="openNewTab" active-color="#13ce66" inactive-color="#ff4949" @change="changeOpenTabStatus">
+            </el-switch>
+          </el-col>
+        </el-row>
       </div>
     </div>
   </div>
@@ -56,6 +66,7 @@ export default {
       search_engine: null,
       img_types: [],  // {id: "36", name: "4K专区", order_num: "110", tag: "", create_time: "2015-12-08 13:50:44"}
       image_type: null,
+      openNewTab: false,
     }
   },
   mounted() {
@@ -69,6 +80,10 @@ export default {
       this.image_type = value;
     });
 
+    Storage.get('onpen_new_tab').then(value => {
+      this.openNewTab = value;
+    });
+
     // get background image type list.
     RemoteImages.getImagesTypeList().then(value => {
       this.img_types = value;
@@ -77,6 +92,10 @@ export default {
     });
   },
   methods: {
+    changeOpenTabStatus() {
+      Storage.set({onpen_new_tab: this.openNewTab});
+    },
+
     /**
      * change search engine.
      */
