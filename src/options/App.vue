@@ -45,38 +45,14 @@
 <script>
 import RemoteImages from "../utils/RemoteImages";
 import Storage from "../utils/Storage";
+import SearchEngine from "../utils/SearchEngine";
 
 export default {
   name: "App",
 
   data() {
     return {
-      engines: [{
-        key: 'baidu',
-        name: '百度',
-        icon: "baidu.png",
-        value: 'https://www.baidu.com/s?wd=%s'
-      }, {
-        key: 'google',
-        name: '谷歌',
-        icon: "google.png",
-        value: 'https://www.google.com/search?q=%s'
-      },{
-        key: 'bing',
-        name: '必应',
-        icon: "bing.png",
-        value: 'https://cn.bing.com/search?q=%s',
-      },{
-        key: 'duckduckgo',
-        name: 'DuckDuckGo',
-        icon: 'duckduckgo.png',
-        value: 'https://duckduckgo.com/?q=%s',
-      },{
-        key: 'geekband',
-        name: '极客搜索',
-        icon: 'geekband.png',
-        value: 'https://s.geekbang.org/search/c=0/k=%s/t='
-      }],
+      engines: Object.values(SearchEngine),
       search_engine: null,
       img_types: [],  // {id: "36", name: "4K专区", order_num: "110", tag: "", create_time: "2015-12-08 13:50:44"}
       image_type: null,

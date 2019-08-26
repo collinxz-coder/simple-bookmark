@@ -14,29 +14,9 @@
                         <img v-if="engine_icon" :src="engine_icon" class="engine-icon" />
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item command="google">
-                            <img src="/images/google.png" class="engine-icon change-engine" />
+                        <el-dropdown-item :command="item.key" v-for="item in engines">
+                            <img :src="'/images/' + item.icon" class="engine-icon change-engine" />
                             谷歌
-                        </el-dropdown-item>
-
-                        <el-dropdown-item command="bing">
-                            <img src="/images/bing.png" class="engine-icon change-engine" />
-                            必应
-                        </el-dropdown-item>
-
-                        <el-dropdown-item command="duckduckgo">
-                            <img src="/images/duckduckgo.png" class="engine-icon change-engine" />
-                            DuckDuck Go
-                        </el-dropdown-item>
-
-                        <el-dropdown-item command="geekband">
-                            <img src="/images/geekband.png" class="engine-icon change-engine" />
-                            极客搜索
-                        </el-dropdown-item>
-
-                        <el-dropdown-item command="baidu">
-                            <img src="/images/baidu.png" class="engine-icon change-engine" />
-                            百度
                         </el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -66,8 +46,6 @@
 
     import Storage from "../utils/Storage";
     import SearchEngine from "../utils/SearchEngine";
-
-    import axios from 'axios';
     import RemoteImages from "../utils/RemoteImages";
     export default {
         name: "App.vue",
@@ -78,6 +56,7 @@
                 search_key: '',
                 engine_icon: '',
                 img_offset: null,      // 背景图片偏移量
+                engines: Object.values(SearchEngine),
             }
         },
 
