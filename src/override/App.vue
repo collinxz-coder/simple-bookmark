@@ -85,6 +85,7 @@
 
                     Storage.get('offset_' + this.img_type + '_time').then(time => {
                         if ((Date.parse(new Date()) / 1000 - time) > 86400) {
+                            console.log("自增");
                             this.img_offset++;
                         }
                     }).catch(err => {});
@@ -165,6 +166,7 @@
         justify-content: center;
         align-items: center;
         padding: 0 15px;
+        box-shadow: 3px 3px 15px 1px #888;
     }
     .search-input {
         flex: 1;
