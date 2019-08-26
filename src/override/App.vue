@@ -36,14 +36,6 @@
 </template>
 
 <script>
-    // import search engine icon.
-    import '../../src/assets/images/baidu.png';
-    import '../../src/assets/images/google.png';
-    import '../../src/assets/images/geekband.png';
-    import '../../src/assets/images/bing.png';
-    import '../../src/assets/images/duckduckgo.png';
-    import '../../src/assets/images/bookmark.png';
-
     import Storage from "../utils/Storage";
     import SearchEngine from "../utils/SearchEngine";
     import RemoteImages from "../utils/RemoteImages";
