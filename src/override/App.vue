@@ -3,6 +3,11 @@
         <div class="web_bg" :style="{backgroundImage: 'url(' + bg_img_url + ')'}"></div>
 
         <div class="content">
+
+             <p class="logo">
+                 <img src="/images/bookmark.png" />
+             </p>
+
             <div class="search-box">
                 <el-dropdown @command="handleCommand" trigger="click">
                     <span class="el-dropdown-link">
@@ -36,7 +41,7 @@
                     </el-dropdown-menu>
                 </el-dropdown>
 
-                <input type="text" class="search-input" v-model="search_key" @keyup.enter="search" autofocus />
+                <input type="text" class="search-input" placeholder="搜你想要的" v-model="search_key" @keyup.enter="search" autofocus />
                 <a @click="search"><i class="el-icon-search search-icon"></i></a>
             </div>
         </div>
@@ -57,6 +62,7 @@
     import '../../src/assets/images/geekband.png';
     import '../../src/assets/images/bing.png';
     import '../../src/assets/images/duckduckgo.png';
+    import '../../src/assets/images/bookmark.png';
 
     import Storage from "../utils/Storage";
     import SearchEngine from "../utils/SearchEngine";
@@ -191,7 +197,7 @@
     }
 
     .content {
-        margin: 100px auto 0 auto;
+        margin: 180px auto 0 auto;
         /*background: rgba(255,255,255,0.5);*/
         max-width: 1000px;
         /*padding: 50px 0 50px 0;*/
@@ -211,7 +217,6 @@
         outline: none;
         border: none;
         font-size: 14px;
-        font-weight: bold;
         margin-left: 10px;
     }
     .search-icon {
@@ -222,7 +227,8 @@
         cursor: pointer;
     }
     .engine-icon {
-        height: 35px;
+        height: 25px;
+        vertical-align: middle;
     }
     .footer-bar {
         position: fixed;
@@ -245,5 +251,9 @@
     .change-engine {
         vertical-align: middle;
         margin-right: 10px;
+    }
+    .logo {
+        text-align: center;
+        margin-bottom: 60px;
     }
 </style>
