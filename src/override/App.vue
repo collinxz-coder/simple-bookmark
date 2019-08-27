@@ -16,7 +16,7 @@
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item :command="item.key" v-for="item in engines">
                             <img :src="'/images/' + item.icon" class="engine-icon change-engine" />
-                            谷歌
+                            {{ item.name }}
                         </el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
