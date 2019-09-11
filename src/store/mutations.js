@@ -1,7 +1,14 @@
 import * as types from './mutation-types'
 
 export default {
-  [types.UPDATE_FOO] (state, payload) {
-    state.foo = payload
+
+  /**
+   * 更新 user state.
+   *
+   * @param state
+   * @param payload
+   */
+  [types.GET_USER_INFO] (state, payload) {
+    state.user = payload;
   }
 }

@@ -9,7 +9,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    foo: 'bar'
+    user: {
+      token: null,
+      is_login: false,
+    }
   },
   getters,
   mutations,
