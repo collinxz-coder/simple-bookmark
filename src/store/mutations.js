@@ -10,5 +10,9 @@ export default {
    */
   [types.GET_USER_INFO] (state, payload) {
     state.user = payload;
+  },
+
+  [types.GET_BOOKMARK] (state, payload) {
+    state.book_mark_class = payload;
   }
 }

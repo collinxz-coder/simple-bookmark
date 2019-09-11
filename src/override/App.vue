@@ -32,6 +32,38 @@
                 <a class="change-bg" @click="next_bg">下一张壁纸</a>
             </p>
         </div>
+
+        <el-button class="menu" @click="drawer = true" type="primary" icon="el-icon-menu" circle></el-button>
+        <el-drawer title="书签" :visible.sync="drawer" direction="ltr">
+            <el-tree :expand-on-click-node="false" :data="bookmark" node-key="id" :props="{label: 'name'}">
+                <span slot-scope="{node, data}" class="tree-node">
+                    <span>
+                        <i class="el-icon-notebook-2" v-if="data.type == 'dir'" />
+                        <i class="el-icon-link" v-else></i>
+                        {{ node.label }}
+                    </span>
+                    <span>
+                        <!-- 编辑 -->
+                        <el-tooltip content="修改" placement="bottom">
+                            <el-button type="text"><i style="color: #333" class="el-icon-edit"></i></el-button>
+                        </el-tooltip>
+                        <!-- 添加子分类 -->
+                        <el-tooltip content="添加子分类" placement="bottom" v-if="data.type == 'dir'">
+                            <el-button type="text"><i class="el-icon-folder-add" style="color: #333" /> </el-button>
+                        </el-tooltip>
+
+                        <!-- 添加书签 -->
+                        <el-tooltip content="添加书签" placement="bottom" v-if="data.type == 'dir'">
+                            <el-button type="text"><i class="el-icon-document-add" style="color: #333" /> </el-button>
+                        </el-tooltip>
+                        <!-- 删除节点 -->
+                        <el-tooltip content="删除" placement="bottom">
+                            <el-button type="text" @click="node_delete"><i style="color: #333" class="el-icon-delete-solid" /></el-button>
+                        </el-tooltip>
+                    </span>
+                </span>
+            </el-tree>
+        </el-drawer>
     </div>
 </template>
 
@@ -39,10 +71,13 @@
     import Storage from "../utils/Storage";
     import SearchEngine from "../utils/SearchEngine";
     import RemoteImages from "../utils/RemoteImages";
+    import { mapGetters } from 'vuex';
+
     export default {
         name: "App.vue",
         data() {
             return {
+                drawer: false,
                 bg_img_url: '',     // 背景图片地址
                 img_type: '',
                 search_key: '',
@@ -51,6 +86,13 @@
                 engines: Object.values(SearchEngine),
                 openNewTab: false,
             }
+        },
+
+        computed: {
+            ...mapGetters([
+              'user',
+              'bookmark'
+            ])
         },
 
         methods: {
@@ -117,10 +159,18 @@
                     console.log(err);
                     console.log("error");
                 });
+            },
+
+            // 删除树节点
+            node_delete() {
+                console.log("删除树节点")
             }
         },
 
         mounted() {
+            // 初始化用户信息
+            this.$store.dispatch('getUserInfo');
+
             Storage.get('engine_icon').then(res => {
                 this.engine_icon = "/images/" + res;
             });
@@ -161,6 +211,16 @@
                     let time_key = offset_key + '_time';
                     Storage.set({[offset_key]: this.img_offset, [time_key]: Date.parse(new Date()) / 1000});
                 }
+            },
+
+            user(val) {
+                if (val.is_login) {
+                    this.$store.dispatch("getBookClass");
+                }
+            },
+
+            bookmark(val) {
+                console.log(JSON.stringify(val));
             }
         }
     }
@@ -239,5 +299,18 @@
     .logo {
         text-align: center;
         margin-bottom: 60px;
+    }
+    .menu {
+        position: fixed;
+        bottom: 50px;
+        right: 30px;
+    }
+    .tree-node {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        padding-right: 8px;
     }
 </style>

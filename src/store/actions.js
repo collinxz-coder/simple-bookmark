@@ -3,6 +3,8 @@ import Storage from "../utils/Storage";
 import qs from 'qs';
 
 import axios from 'axios';
+import Tools from "../utils/Tools";
+import awaitAsyncGenerator from "@babel/runtime-corejs3/helpers/esm/awaitAsyncGenerator";
 
 const axios_instance = axios.create({
   baseURL: "http://localhost:8888/",
@@ -48,5 +50,20 @@ export const loginByEmail = ({ commit }, payload) => {
     return;
   }).catch(err => {
 
+  })
+};
+
+
+export const  getBookClass = ({ state, commit }) => {
+  let url = "?service=App.BookMark.GetAllBookMarkAndBookClass";
+
+  axios_instance.post(url, qs.stringify({ token: state.user.token })).then(res => {
+    let data = res.data;
+    if (data.ret != 200) {
+      throw data.msg;
+    }
+    return data.data;
+  }).then(res => {
+    commit(types.GET_BOOKMARK, Tools.listToTree(res));
   })
 };

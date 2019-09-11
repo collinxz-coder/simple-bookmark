@@ -12,7 +12,9 @@ export default new Vuex.Store({
     user: {
       token: null,
       is_login: false,
-    }
+    },
+
+    book_mark_class: [],
   },
   getters,
   mutations,
