@@ -12,7 +12,21 @@ export default {
     state.user = payload;
   },
 
+  /**
+   * 书签(tree)
+   * @param state
+   * @param payload
+   */
   [types.GET_BOOKMARK] (state, payload) {
     state.book_mark_class = payload;
+  },
+
+  /**
+   * 书签(linear)
+   * @param state
+   * @param payload
+   */
+  [types.GET_LINEAR_BOOKMARK] (state, payload) {
+    state.linear_mark_class = payload;
   }
 }

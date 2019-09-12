@@ -35,35 +35,26 @@
 
         <el-button class="menu" @click="drawer = true" type="primary" icon="el-icon-menu" circle></el-button>
         <el-drawer title="书签" :visible.sync="drawer" direction="ltr">
-            <el-tree :expand-on-click-node="false" :data="bookmark" node-key="id" :props="{label: 'name'}">
+            <el-tree :expand-on-click-node="false" :data="bookmark" node-key="id" :props="{label: 'name'}" @node-click="handleNodeClick" @node-contextmenu="contextMenu">
                 <span slot-scope="{node, data}" class="tree-node">
                     <span>
                         <i class="el-icon-notebook-2" v-if="data.type == 'dir'" />
-                        <i class="el-icon-link" v-else></i>
+                        <img :src="getIcon(data.url)" v-else style="height: 15px; vertical-align: middle" />
                         {{ node.label }}
                     </span>
-                    <span>
-                        <!-- 编辑 -->
-                        <el-tooltip content="修改" placement="bottom">
-                            <el-button type="text"><i style="color: #333" class="el-icon-edit"></i></el-button>
-                        </el-tooltip>
-                        <!-- 添加子分类 -->
-                        <el-tooltip content="添加子分类" placement="bottom" v-if="data.type == 'dir'">
-                            <el-button type="text"><i class="el-icon-folder-add" style="color: #333" /> </el-button>
-                        </el-tooltip>
 
-                        <!-- 添加书签 -->
-                        <el-tooltip content="添加书签" placement="bottom" v-if="data.type == 'dir'">
-                            <el-button type="text"><i class="el-icon-document-add" style="color: #333" /> </el-button>
-                        </el-tooltip>
-                        <!-- 删除节点 -->
-                        <el-tooltip content="删除" placement="bottom">
-                            <el-button type="text" @click="node_delete"><i style="color: #333" class="el-icon-delete-solid" /></el-button>
-                        </el-tooltip>
-                    </span>
                 </span>
             </el-tree>
         </el-drawer>
+
+        <ul v-show="contextmenu" class="dir-contextmenu" :style="contextmenu_style" v-clickoutside="hideContextMenu">
+            <li><el-button type="text" @click="addRootClass">添加根分类</el-button></li>
+            <li v-if="context_type=='dir'"><el-button type="text" size="small" @click="addChildClass">添加子分类</el-button></li>
+            <li v-if="context_type=='dir'"><el-button type="text" size="small">修改</el-button></li>
+            <li v-if="context_type=='dir'"><el-button type="text" size="small">删除</el-button></li>
+            <li v-if="context_type=='link'"><el-button type="text" size="small">修改</el-button></li>
+            <li v-if="context_type=='link'"><el-button type="text" size="small">删除</el-button></li>
+        </ul>
     </div>
 </template>
 
@@ -72,6 +63,7 @@
     import SearchEngine from "../utils/SearchEngine";
     import RemoteImages from "../utils/RemoteImages";
     import { mapGetters } from 'vuex';
+    import clickoutside from '../utils/clickoutside';
 
     export default {
         name: "App.vue",
@@ -85,6 +77,14 @@
                 img_offset: null,      // 背景图片偏移量
                 engines: Object.values(SearchEngine),
                 openNewTab: false,
+
+                contextmenu: false,
+                context_type: "dir",
+                contextmenu_style: {
+                    top: "0px",
+                    left: "0px"
+                },
+                contextmenu_data: null,
             }
         },
 
@@ -164,6 +164,69 @@
             // 删除树节点
             node_delete() {
                 console.log("删除树节点")
+            },
+
+            // 树节点被点击
+            handleNodeClick(data) {
+                if (data.type === "link") {
+                    chrome.tabs.create({ url: data.url, active: true });
+                }
+            },
+
+            getIcon(url) {
+                let urlObject = new URL(url);
+                return urlObject.origin + "/favicon.ico";
+            },
+
+            contextMenu(event, data) {
+                this.contextmenu_style.top = (event.clientY - 20) + "px";
+                this.contextmenu_style.left = (event.clientX - 10) + "px";
+                this.context_type = data.type;
+                this.contextmenu = true;
+                this.contextmenu_data = data;
+            },
+
+            hideContextMenu() {
+                this.contextmenu = false;
+            },
+
+            addBookClass(parent_id) {
+                this.$prompt("请输入分类名称", "添加分类", {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputPattern: /\w*/,
+                    inputErrorMessage: "名称不能为空"
+                }).then(({ value }) => {
+                    this.$store.dispatch("addChildClass", {
+                        parent_id: parent_id,
+                        name: value,
+                        success: () => {
+                            this.$notify({
+                                title: '成功',
+                                message: '添加分类成功',
+                                type: 'success'
+                            });
+                        }, error: (msg) => {
+                            this.$notify.error({
+                                title: '失败',
+                                message: msg,
+                            });
+                        }
+                    })
+                }).catch(() => {
+                    // cancel
+                })
+            },
+
+            addChildClass() {
+                if (! this.contextmenu_data) {
+                    return false;
+                }
+                this.addBookClass(this.contextmenu_data.id);
+            },
+
+            addRootClass() {
+                this.addBookClass(0);
             }
         },
 
@@ -222,6 +285,10 @@
             bookmark(val) {
                 console.log(JSON.stringify(val));
             }
+        },
+
+        directives: {
+            clickoutside
         }
     }
 </script>
@@ -312,5 +379,27 @@
         justify-content: space-between;
         font-size: 14px;
         padding-right: 8px;
+    }
+    .dir-contextmenu {
+        background: #333;
+        color: #FFF;
+        padding: 0px;
+        overflow: hidden;
+        list-style: none;
+        position: fixed;
+        width: 100px;
+        z-index: 9999;
+        border: 1px solid #000;
+        border-radius: 5px;
+    }
+    .dir-contextmenu li {
+        flex: 1;
+        padding: 0 20px;
+    }
+    .dir-contextmenu li:hover {
+        background: cornflowerblue;
+    }
+    .dir-contextmenu button {
+        color: #FFF;
     }
 </style>

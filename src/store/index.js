@@ -15,6 +15,7 @@ export default new Vuex.Store({
     },
 
     book_mark_class: [],
+    linear_mark_class: []
   },
   getters,
   mutations,

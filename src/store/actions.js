@@ -4,7 +4,6 @@ import qs from 'qs';
 
 import axios from 'axios';
 import Tools from "../utils/Tools";
-import awaitAsyncGenerator from "@babel/runtime-corejs3/helpers/esm/awaitAsyncGenerator";
 
 const axios_instance = axios.create({
   baseURL: "http://localhost:8888/",
@@ -64,6 +63,21 @@ export const  getBookClass = ({ state, commit }) => {
     }
     return data.data;
   }).then(res => {
+    commit(types.GET_LINEAR_BOOKMARK, res);
     commit(types.GET_BOOKMARK, Tools.listToTree(res));
+  })
+};
+
+export const addChildClass = ({ state, commit }, payload) => {
+  let url = "?service=App.BookClass.AddClass";
+
+  axios_instance.post(url, qs.stringify({ parent_id: payload.parent_id, name: payload.name, token: state.user.token })).then(res => {
+    let data = res.data;
+    
+    if (data.ret == 200) {
+      payload.success();
+    } else {
+      payload.error(data.msg);
+    }
   })
 };
