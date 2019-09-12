@@ -110,7 +110,7 @@ export const getClass = ({ state, commit }) => {
 export const addBookMark = ({ state, commit }, payload) => {
   let url = "?service=App.BookMark.AddBookMark";
 
-  axios_instance.post(url, qs.stringify({ class_id: payload.class_id, name: payload.name, url: payload.url, token: state.user.token })).then(res => {
+  axios_instance.post(url, qs.stringify({ class_id: payload.class_id, name: payload.name, url: payload.url, icon: payload.icon, token: state.user.token })).then(res => {
     res = res.data;
 
     if (res.ret == 200) {

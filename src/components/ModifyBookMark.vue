@@ -90,6 +90,7 @@
           class_id: parent_id,
           name: this.page_title,
           url: this.page_url,
+          icon: this.favIconUrl,
           success: () => {
             // this.$notify({ title: "添加成功", message: "添加书签成功", type: "success" })
             window.close();
