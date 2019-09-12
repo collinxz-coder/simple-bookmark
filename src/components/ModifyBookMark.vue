@@ -33,9 +33,15 @@
   import { mapGetters } from 'vuex';
   export default {
     name: "ModifyBookMark",
+    props: {
+      type: {
+        type: String,
+        default: "add"
+      }
+    },
     data() {
       return {
-        title: "修改书签",
+        title: "",
         class_loading: true,
         page_title: "",
         page_url: "",
@@ -51,6 +57,12 @@
     },
 
     mounted() {
+      if (this.type == "add") {
+        this.title = "添加书签";
+      } else if (this.type == "update") {
+        this.title = "修改书签";
+      }
+
       chrome.tabs.query({ active: true, currentWindow: true }, tab => {
         if (tab.length > 0) {
           this.page_title = tab[0].title;
@@ -65,7 +77,10 @@
         this.current_node = data;
       },
 
-      save() {
+      /**
+       * 添加书签
+       */
+      addBookMark() {
         let parent_id = 0;
         if (this.current_node) {
           parent_id = this.current_node.id;
@@ -85,6 +100,19 @@
         };
 
         this.$store.dispatch("addBookMark", data);
+      },
+
+      /**
+       * 修改书签
+       */
+      updateBookMark() {
+
+      },
+
+      save() {
+        if (this.type == "add") {
+          this.addBookMark();
+        }
       }
     },
 
