@@ -32,9 +32,6 @@ export default class RemoteImages {
      */
     static getImgUrl(type, offset) {
         let url = "http://wallpaper.apc.360.cn/index.php?c=WallPaper&a=getAppsByCategory&cid=" + type + "&start=" + offset + "&count=1";
-        axios.get(url).then(res => {
-
-        });
 
         return (new Promise((resolve, reject) => {
             axios.get(url).then(res => {
