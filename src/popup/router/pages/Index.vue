@@ -1,17 +1,22 @@
 <template>
-  <p>Hello world!</p>
+  <div class="container">
+    <ModifyBookMark ></ModifyBookMark>
+  </div>
 </template>
 
 <script>
-export default {
-  data () {
-    return {}
+  import ModifyBookMark from "../../../components/ModifyBookMark";
+  export default {
+    components: {ModifyBookMark},
+    data() {
+      return {}
+    }
   }
-}
 </script>
 
 <style lang="scss" scoped>
-p {
-  font-size: 20px;
-}
+  .container {
+    background: #323639;
+    width: 512px;
+  }
 </style>

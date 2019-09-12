@@ -28,5 +28,11 @@ export default {
    */
   [types.GET_LINEAR_BOOKMARK] (state, payload) {
     state.linear_mark_class = payload;
+  },
+
+  // ---
+
+  [types.GET_BOOKCLASS] (state, payload) {
+    state.book_class = payload;
   }
 }

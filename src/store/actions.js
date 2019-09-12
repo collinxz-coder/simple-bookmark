@@ -73,11 +73,50 @@ export const addChildClass = ({ state, commit }, payload) => {
 
   axios_instance.post(url, qs.stringify({ parent_id: payload.parent_id, name: payload.name, token: state.user.token })).then(res => {
     let data = res.data;
-    
+
     if (data.ret == 200) {
       payload.success();
     } else {
       payload.error(data.msg);
+    }
+  })
+};
+
+// ---
+/**
+ * 获取所有分类.
+ *
+ * @param state
+ * @param commit
+ */
+export const getClass = ({ state, commit }) => {
+  let url = "?service=App.BookClass.GetAllClass";
+
+  axios_instance.post(url, qs.stringify({ token: state.user.token })).then(res => {
+    res = res.data;
+    if (res.ret == 200) {
+      commit(types.GET_BOOKCLASS, Tools.listToTree(res.data));
+    }
+  })
+};
+
+/**
+ * 添加书签.
+ *
+ * @param state
+ * @param commit
+ * @param payload
+ */
+export const addBookMark = ({ state, commit }, payload) => {
+  let url = "?service=App.BookMark.AddBookMark";
+
+  axios_instance.post(url, qs.stringify({ class_id: payload.class_id, name: payload.name, url: payload.url, token: state.user.token })).then(res => {
+    res = res.data;
+
+    if (res.ret == 200) {
+      payload.success();
+    } else {
+      payload.error(res.msg);
     }
   })
 };
