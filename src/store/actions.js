@@ -1,28 +1,19 @@
 import * as types from './mutation-types'
 import Storage from "../utils/Storage";
-import qs from 'qs';
+import axios from '../utils/Axios';
 
-import axios from 'axios';
-import Tools from "../utils/Tools";
-
-const axios_instance = axios.create({
-  baseURL: "http://localhost:8888/",
-  headers: {
-    "content-type": "application/x-www-form-urlencoded"
-  }
-});
-
+// ---
 /**
  * 获取用户信息
  * @param commit
  */
-export const getUserInfo = ({ commit }) => {
+export const getUserInfo = ({commit}) => {
   Storage.compulsoryGet("token").then(res => {
     // 获取 token 成功
-    commit(types.GET_USER_INFO, { token: res, is_login: true });
+    commit(types.GET_USER_INFO, {token: res, is_login: true});
   }).catch(err => {
     // 获取 token 失败
-    commit(types.GET_USER_INFO, { token: null, is_login: false });
+    commit(types.GET_USER_INFO, {token: null, is_login: false});
   });
 };
 
@@ -31,12 +22,10 @@ export const getUserInfo = ({ commit }) => {
  * @param commit
  * @param payload
  */
-export const loginByEmail = ({ commit }, payload) => {
+export const loginByEmail = ({commit}, payload) => {
   let url = "?service=App.User.Login";
 
-  axios_instance.post(url, qs.stringify(payload), {
-
-  }).then(res => {
+  axios.post(url, payload).then(res => {
     let data = res.data;
     if (data.ret !== 200) {
       alert(data.msg);
@@ -44,76 +33,124 @@ export const loginByEmail = ({ commit }, payload) => {
     }
 
     let token = data.data.token;
-    Storage.set({ "token": token });
-    commit(types.GET_USER_INFO, { token: token, is_login: true });
-    return;
-  }).catch(err => {
-
-  })
+    Storage.set({"token": token});
+    commit(types.GET_USER_INFO, {token: token, is_login: true});
+  });
 };
 
-
-export const  getBookClass = ({ state, commit }) => {
-  let url = "?service=App.BookMark.GetAllBookMarkAndBookClass";
-
-  axios_instance.post(url, qs.stringify({ token: state.user.token })).then(res => {
-    let data = res.data;
-    if (data.ret != 200) {
-      throw data.msg;
-    }
-    return data.data;
-  }).then(res => {
-    commit(types.GET_LINEAR_BOOKMARK, res);
-    commit(types.GET_BOOKMARK, Tools.listToTree(res));
-  })
-};
-
-export const addChildClass = ({ state, commit }, payload) => {
-  let url = "?service=App.BookClass.AddClass";
-
-  axios_instance.post(url, qs.stringify({ parent_id: payload.parent_id, name: payload.name, token: state.user.token })).then(res => {
-    let data = res.data;
-
-    if (data.ret == 200) {
-      payload.success();
-    } else {
-      payload.error(data.msg);
-    }
-  })
-};
-
-// ---
 /**
- * 获取所有分类.
+ * 获取所有书签分类.
  *
- * @param state
  * @param commit
+ * @param state
  */
-export const getClass = ({ state, commit }) => {
+export const getBookClass = ({commit, state}) => {
   let url = "?service=App.BookClass.GetAllClass";
 
-  axios_instance.post(url, qs.stringify({ token: state.user.token })).then(res => {
+  axios.post(url, {token: state.user.token}).then(res => {
     res = res.data;
     if (res.ret == 200) {
-      commit(types.GET_BOOKCLASS, Tools.listToTree(res.data));
+      let map = {};
+      res.data.forEach(item => {
+        map[item.id] = item;
+      });
+
+      commit(types.GET_BOOK_CLASS, map);
     }
   })
 };
 
 /**
- * 添加书签.
+ * 获取所有书签.
  *
- * @param state
  * @param commit
+ * @param state
+ */
+export const getBookMark = ({commit, state}) => {
+  let url = "?service=App.BookMark.GetAllBookMark";
+
+  axios.post(url, {token: state.user.token}).then(res => {
+    res = res.data;
+    if (res.ret == 200) {
+      let map = {};
+      res.data.forEach(item => {
+        map[item.id] = item;
+      });
+
+      commit(types.GET_BOOK_MARK, map);
+    }
+  })
+};
+
+/**
+ * 添加分类.
+ *
+ * @param commit
+ * @param state
  * @param payload
  */
-export const addBookMark = ({ state, commit }, payload) => {
-  let url = "?service=App.BookMark.AddBookMark";
+export const addBookClass = ({commit, state}, payload) => {
+  let url = "?service=App.BookClass.AddClass";
 
-  axios_instance.post(url, qs.stringify({ class_id: payload.class_id, name: payload.name, url: payload.url, icon: payload.icon, token: state.user.token })).then(res => {
+  axios.post(url, {token: state.user.token, parent_id: payload.parent_id, name: payload.name}).then(res => {
     res = res.data;
 
     if (res.ret == 200) {
+      let new_class = {
+        id: res.data.id,
+        name: payload.name,
+        children: [],
+        type: 'dir',
+        parent_id: payload.parent_id
+      };
+      commit(types.ADD_BOOKCLASS, new_class);
+
+      payload.success();
+    } else {
+      payload.error(res.msg);
+    }
+  })
+};
+
+/**
+ * 删除分类.
+ *
+ * @param commit
+ * @param state
+ * @param payload
+ */
+export const deleteBookClass = ({commit, state}, payload) => {
+  let url = "?service=App.BookClass.DeleteClass";
+
+  axios.post(url, {token: state.user.token, id: payload.id}).then(res => {
+    res = res.data;
+
+    if (res.ret == 200) {
+      commit(types.DELETE_BOOKCLASS, payload.id);
+      payload.success();
+    } else {
+      payload.error(res.msg);
+    }
+  })
+};
+
+/**
+ * 修改分类.
+ *
+ * @param commit
+ * @param state
+ * @param payload
+ */
+export const modifyBookClass = ({commit, state}, payload) => {
+  let url = "?service=App.BookClass.ModifyClass";
+
+  console.log(payload);
+
+  axios.post(url, {token: state.user.token, id: payload.id, name: payload.name, parent_id: payload.parent_id}).then(res => {
+    res = res.data;
+
+    if (res.ret == 200) {
+      commit(types.MODIFY_CLASS, {name: payload.name, id: payload.id});
       payload.success();
     } else {
       payload.error(res.msg);

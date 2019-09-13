@@ -13,26 +13,57 @@ export default {
   },
 
   /**
-   * 书签(tree)
+   * 获取书签分类.
+   *
    * @param state
    * @param payload
    */
-  [types.GET_BOOKMARK] (state, payload) {
-    state.book_mark_class = payload;
+  [types.GET_BOOK_CLASS] (state, payload) {
+    state.book_class = payload;
+    state.override_initial += 1;
   },
 
   /**
-   * 书签(linear)
+   * 获取书签.
+   *
    * @param state
    * @param payload
    */
-  [types.GET_LINEAR_BOOKMARK] (state, payload) {
-    state.linear_mark_class = payload;
+  [types.GET_BOOK_MARK] (state, payload) {
+    state.book_mark = payload;
+    state.override_initial += 1;
   },
 
-  // ---
+  /**
+   * 添加书签.
+   *
+   * @param state
+   * @param payload
+   */
+  [types.ADD_BOOKCLASS] (state, payload) {
+    state.book_class[payload.id] = payload;
+    state.override_initial += 1;
+  },
 
-  [types.GET_BOOKCLASS] (state, payload) {
-    state.book_class = payload;
+  /**
+   * 删除书签.
+   *
+   * @param state
+   * @param payload
+   */
+  [types.DELETE_BOOKCLASS] (state, payload) {
+    delete state.book_class[payload];
+    state.override_initial += 1;
+  },
+
+  /**
+   * 修改书签.
+   *
+   * @param state
+   * @param payload
+   */
+  [types.MODIFY_CLASS] (state, payload) {
+    state.book_class[payload.id].name = payload.name;
+    state.override_initial += 1;
   }
 }
