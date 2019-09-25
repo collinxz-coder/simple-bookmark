@@ -158,6 +158,13 @@ export const modifyBookClass = ({commit, state}, payload) => {
   })
 };
 
+/**
+ * 删除书签.
+ *
+ * @param commit
+ * @param state
+ * @param payload
+ */
 export const deleteBookMark = ({commit, state}, payload) => {
   let url = "?service=App.BookMark.DeleteBookMark";
   axios.post(url, {token: state.user.token, id: payload.id}).then(res => {
@@ -170,4 +177,20 @@ export const deleteBookMark = ({commit, state}, payload) => {
       payload.error(res.msg);
     }
   })
+};
+
+
+export const addBookMark = ({commit, state}, payload) => {
+  const url = "?service=App.BookMark.AddBookMark";
+
+  axios.post(url, {class_id: payload.class_id, name: payload.name, url: payload.url, icon: payload.icon, token: state.user.token}).then(res => {
+    res = res.data;
+
+    if (res.ret == 200) {
+      payload.success();
+    } else {
+      payload.error(res.msg);
+    }
+  });
+  console.log(JSON.stringify(payload));
 };

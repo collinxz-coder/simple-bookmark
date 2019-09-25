@@ -70,5 +70,9 @@ export default {
   [types.DELETE_BOOKMARK] (state, payload) {
     delete state.book_mark[payload.id];
     state.override_initial += 1;
+  },
+
+  [types.ADD_BOOKMARK] (state) {
+    state.override_initial += 1;
   }
 }

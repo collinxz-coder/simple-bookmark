@@ -14,7 +14,7 @@
         <input type="text" v-model="page_url" />
       </div>
 
-      <el-tree v-loading="class_loading" :data="bookclass" class="book-class-tree" :props="{label: 'name'}" empty-text="" :check-on-click-node="true" :expand-on-click-node="false" @current-change="selectedNode">
+      <el-tree v-loading="class_loading" :data="book_class_array" class="book-class-tree" :props="{label: 'name'}" empty-text="" :check-on-click-node="true" :expand-on-click-node="false" @current-change="selectedNode">
         <span class="custom-tree-node" slot-scope="{ node, data }">
           <i class="el-icon-folder" />
           {{ node.label }}
@@ -46,13 +46,14 @@
         page_title: "",
         page_url: "",
         favIconUrl: "",
-        current_node: null
+        current_node: null,
+        book_class_array: [],
       }
     },
 
     computed: {
       ...mapGetters([
-        'bookclass'
+        'book_class'
       ])
     },
 
@@ -118,8 +119,9 @@
     },
 
     watch: {
-      bookclass(val) {
+      book_class(val) {
         this.class_loading = false;
+        this.book_class_array = Object.values(val);
       }
     }
   }
