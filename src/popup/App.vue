@@ -28,9 +28,7 @@
     watch: {
       user(val) {
         this.isLogin = val.is_login;
-        if (val.is_login) {
-            this.$store.dispatch("getClass");
-        }
+        val.is_login && this.$store.dispatch("getBookClass");
       }
     }
   }
