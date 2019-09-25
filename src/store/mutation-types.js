@@ -6,3 +6,4 @@ export const DELETE_BOOKCLASS = 'DELETE_BOOKCLASS';
 export const MODIFY_CLASS = 'MODIFY_CLASS';
 export const DELETE_BOOKMARK = 'DELETE_BOOKMARK';
 export const ADD_BOOKMARK = 'ADD_BOOKMARK';
+export const LOGOUT = 'LOGOUT';

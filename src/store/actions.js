@@ -18,6 +18,15 @@ export const getUserInfo = ({commit}) => {
 };
 
 /**
+ * 退出登录
+ * @param commit
+ */
+export const logout = ({commit}) => {
+  Storage.set({token: null});
+  commit(types.LOGOUT);
+};
+
+/**
  * 登录
  * @param commit
  * @param payload

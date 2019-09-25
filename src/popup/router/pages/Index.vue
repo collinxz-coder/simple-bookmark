@@ -1,6 +1,11 @@
 <template>
   <div class="container">
-    <ModifyBookMark ></ModifyBookMark>
+    <div class="menu">
+      <a @click="logout">退出登录</a>
+    </div>
+    <div style="margin-top: -30px">
+      <ModifyBookMark ></ModifyBookMark>
+    </div>
   </div>
 </template>
 
@@ -10,6 +15,12 @@
     components: {ModifyBookMark},
     data() {
       return {}
+    },
+
+    methods: {
+      logout() {
+        this.$store.dispatch('logout');
+      }
     }
   }
 </script>
@@ -18,5 +29,14 @@
   .container {
     background: #323639;
     width: 512px;
+  }
+
+  .menu {
+    text-align: right;
+    padding: 10px;
+  }
+  .menu a {
+    color: #FFFFFF;
+    cursor: pointer;
   }
 </style>

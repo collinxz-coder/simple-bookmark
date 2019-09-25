@@ -74,5 +74,14 @@ export default {
 
   [types.ADD_BOOKMARK] (state) {
     state.override_initial += 1;
+  },
+
+  /**
+   * 退出登录
+   * @param state
+   */
+  [types.LOGOUT] (state) {
+    state.user = {token: null, is_login: false};
+
   }
 }
