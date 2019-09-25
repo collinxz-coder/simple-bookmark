@@ -157,3 +157,17 @@ export const modifyBookClass = ({commit, state}, payload) => {
     }
   })
 };
+
+export const deleteBookMark = ({commit, state}, payload) => {
+  let url = "?service=App.BookMark.DeleteBookMark";
+  axios.post(url, {token: state.user.token, id: payload.id}).then(res => {
+    res = res.data;
+
+    if (res.ret == 200) {
+      commit(types.DELETE_BOOKMARK, {id: payload.id});
+      payload.success();
+    } else {
+      payload.error(res.msg);
+    }
+  })
+};

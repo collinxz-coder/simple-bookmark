@@ -65,5 +65,10 @@ export default {
   [types.MODIFY_CLASS] (state, payload) {
     state.book_class[payload.id].name = payload.name;
     state.override_initial += 1;
+  },
+
+  [types.DELETE_BOOKMARK] (state, payload) {
+    delete state.book_mark[payload.id];
+    state.override_initial += 1;
   }
 }

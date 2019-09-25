@@ -3,23 +3,31 @@
     <el-button class="menu" @click="drawer = true" type="primary" icon="el-icon-menu" circle></el-button>
 
     <el-drawer title="书签" :visible.sync="drawer" direction="ltr">
-      <el-tree v-loading="class_loading" class="book-tree" :data="book_data" :props="{ label: 'name' }" :expand-on-click-node="false">
+      <el-tree v-loading="class_loading" class="book-tree" :data="book_data" :props="{ label: 'name' }"
+               :expand-on-click-node="false">
         <span class="custom-tree-node" slot-scope="{ node, data }">
           <span>
             <i class="el-icon-folder" v-if="data.type == 'dir'"/>
             <i class="el-icon-link" v-if="data.type == 'link' && data.icon == ''"/>
             <img class="link-icon" v-if="data.type == 'link' && data.icon != ''" :src="data.icon"/>
-            {{ node.label }}
+            <el-tooltip class="item" effect="dark" :content="node.label" placement="top-start">
+              <el-button class="node-name-btn" type="text" @dblclick.native="openUrl(data)">
+                {{ node.label }}
+              </el-button>
+            </el-tooltip>
           </span>
           <span>
             <el-button type="text" v-if="data.type == 'dir'" @click="addBookClass(data)">
               <i class="el-icon-plus btn-icon"/>
             </el-button>
             <el-button type="text" v-if="data.type == 'dir'" @click="deleteClass(data)">
-              <i class="el-icon-minus btn-icon" />
+              <i class="el-icon-minus btn-icon"/>
             </el-button>
             <el-button type="text" v-if="data.type == 'dir'" @click="modifyClass(data)">
               <i class="el-icon-edit btn-icon"></i>
+            </el-button>
+            <el-button type="text" v-if="data.type == 'link'" @click="deleteBookMark(data)">
+              <i class="el-icon-minus btn-icon"/>
             </el-button>
           </span>
         </span>
@@ -55,6 +63,30 @@
     },
 
     methods: {
+      /**
+       * 删除书签
+       */
+      deleteBookMark(data) {
+        this.$confirm("是否删除书签？", "提示", {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$store.dispatch("deleteBookMark", {
+            id: data.id,
+            success: _ => this.$message({type: 'success', message: '删除成功'}),
+            error: msg => this.$message({type: 'error', message: msg})
+          })
+        }).catch(_ => this.$message({type: 'info', message: '已取消删除'}));
+      },
+      /**
+       * 跳转
+       */
+      openUrl(data) {
+        if (data.type == "link") {
+          chrome.tabs.create({url: data.url, active: true});
+        }
+      },
       // 添加分类
       addBookClass(data) {
         this.$prompt("请输入分类名称", "添加分类", {
@@ -66,8 +98,12 @@
           this.$store.dispatch("addBookClass", {
             parent_id: data.id,
             name: value,
-            success: _ => {this.$message({type: 'success', message: '添加分类成功'})},
-            error: (msg) => {this.$message({type: 'error', message: msg})}
+            success: _ => {
+              this.$message({type: 'success', message: '添加分类成功'})
+            },
+            error: (msg) => {
+              this.$message({type: 'error', message: msg})
+            }
           });
         }).catch(e => {
           this.$message({type: 'error', message: e});
@@ -90,8 +126,12 @@
         }).then(() => {
           this.$store.dispatch("deleteBookClass", {
             id: data.id,
-            success: _ => {this.$message({type: 'success', message: '删除成功'})},
-            error: (msg) => {this.$message({type: 'error', message: msg})}
+            success: _ => {
+              this.$message({type: 'success', message: '删除成功'})
+            },
+            error: (msg) => {
+              this.$message({type: 'error', message: msg})
+            }
           });
 
         }).catch(() => {
@@ -117,13 +157,17 @@
           cancelButtonText: '取消',
           inputPattern: /\S/,
           inputErrorMessage: '请输入分类名称'
-        }).then(({ value }) => {
+        }).then(({value}) => {
           this.$store.dispatch("modifyBookClass", {
             id: data.id,
             name: value,
             parent_id: data.parent_id,
-            success: _ => {this.$message({type: 'success', message: '修改分类成功'})},
-            error: msg => {this.$message({type: 'error', message: msg})}
+            success: _ => {
+              this.$message({type: 'success', message: '修改分类成功'})
+            },
+            error: msg => {
+              this.$message({type: 'error', message: msg})
+            }
           })
         }).catch(e => {
           this.$message({type: 'error', message: e});
@@ -137,33 +181,37 @@
           return;
         }
 
-        Object.keys(this.book_mark).map(mark_key => {
-          let mark = this.book_mark[mark_key];
+        console.log(this.book_mark);
+        let bookmark = JSON.parse(JSON.stringify(this.book_mark));
+        let bookclass = JSON.parse(JSON.stringify(this.book_class));
+
+        Object.keys(bookmark).map(mark_key => {
+          let mark = bookmark[mark_key];
           mark.name = mark.mark_name;
           mark.type = 'link';
 
-          this.book_class[mark.class_id].children ?
-            this.book_class[mark.class_id].children.push(mark) :
-            this.book_class[mark.class_id].children = [mark];
+          bookclass[mark.class_id].children ?
+            bookclass[mark.class_id].children.push(mark) :
+            bookclass[mark.class_id].children = [mark];
         });
 
 
-        Object.keys(this.book_class).map(class_id => {
-          let book_class = this.book_class[class_id];
+        Object.keys(bookclass).map(class_id => {
+          let book_class = bookclass[class_id];
           book_class.type = 'dir';
 
           if (book_class.parent_id != 0) {
-            this.book_class[book_class.parent_id].children ?
-              this.book_class[book_class.parent_id].children.push(book_class) :
-              this.book_class[book_class.parent_id].children = [book_class];
+            bookclass[book_class.parent_id].children ?
+              bookclass[book_class.parent_id].children.push(book_class) :
+              bookclass[book_class.parent_id].children = [book_class];
           }
         });
 
         //
         let book_array = [];
-        Object.keys(this.book_class).map(class_id => {
-          if (this.book_class[class_id].parent_id == 0) {
-            book_array.push(this.book_class[class_id]);
+        Object.keys(bookclass).map(class_id => {
+          if (bookclass[class_id].parent_id == 0) {
+            book_array.push(bookclass[class_id]);
           }
         });
 
@@ -208,12 +256,16 @@
     background: #3C4043;
   }
 
-  /deep/ .el-tree-node__content {
+  /deep/ .el-tree-node__content button {
     color: #FFF;
   }
 
   /deep/ .is-current > .el-tree-node__content {
     background: #eee !important;
+    color: #3C4043;
+  }
+
+  /deep/ .is-current > .el-tree-node__content button {
     color: #3C4043;
   }
 
@@ -244,5 +296,10 @@
 
   .btn-icon {
     color: #FFF;
+  }
+
+  .node-name-btn {
+    /*max-width: 100px;*/
+    overflow: hidden;
   }
 </style>
